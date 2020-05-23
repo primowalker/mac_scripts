@@ -1,0 +1,11 @@
+#!/bin/ksh
+
+bindir=/net/taqwa.central/export/share/bin
+for page in $@
+do
+   cd /tmp
+   echo working with $page
+   man $page > /tmp/$page
+   [ -s /tmp/$page ] && $bindir/a2ps -o $page.man -m $page
+   rm -f /tmp/$page
+done

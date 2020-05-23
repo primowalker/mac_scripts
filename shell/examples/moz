@@ -1,0 +1,4 @@
+LD_LIBRARY_PATH=/opt/csw/lib
+export LD_LIBRARY_PATH
+/opt/csw/bin/mozilla &
+exit

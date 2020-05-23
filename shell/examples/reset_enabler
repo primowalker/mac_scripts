@@ -1,0 +1,32 @@
+# reset_enabler
+# wt 19-SEP-02 
+# This script is used to remove/reenter SBU enablers when they expire
+
+# stop networker daemons in preparation to delete enablers
+/etc/init.d/networker stop
+sleep 15
+
+# use nsradmin to delete the existing enablers, run this script to re-enter
+# the evaluation enablers 
+
+# enabler code: 5fe2e1-28f3a4-b71f36  -- Networker Network Edition /10
+# enabler code: 373cb9-dc7b5e-bc2ea3  -- ClientPaks for LINUX /1
+# enabler code: bdb43f-865102-119194  -- Autochanger Module, 6 slots
+
+#
+# delete existing enablers
+/usr/sbin/nsr/nsradmin -f /nsr/res/nsr.res -i /nsr/res/input.txt >/dev/null
+
+# restart networker daemons
+/etc/init.d/networker start
+sleep 25
+
+# enter new licenses
+/usr/sbin/nsr/nsrcap -c -v 5fe2e1-28f3a4-b71f36 >/dev/null
+#/usr/sbin/nsr/nsrcap -c -v 373cb9-dc7b5e-bc2ea3 >/dev/null
+#/usr/sbin/nsr/nsrcap -c -v bdb43f-865102-119194 >/dev/null
+
+# Preserve copy of nsr.res file for safe keeping
+/bin/cp /nsr/res/nsr.res /nsr/res/nsr.res.`hostname`
+
+logger -p local2.info -t reset_enabler "SBU enablers have been reset"

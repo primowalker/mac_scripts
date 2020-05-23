@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+function usage {
+    echo
+    echo -e "Usage: parse_query_server_info.sh <property> <query_term>"
+    echo
+    echo "Example - parse_query_server_info.sh Application DATACHOICE"
+    exit
+}
+
+if [ -n "$1" ]; then
+    var="$1"
+else
+        usage
+fi
+
+if [ -n "$2" ]; then
+        var="$2"
+else
+    usage
+fi
+
+property=$1
+term=$2
+
+~/bin/query_server_info.py $property $term | sed 's/\[//g' | sed 's/\]//g' | sed -e 's|["'\'']||g' | sed '/^\s*$/d' | tee -a ~/working/server_query.csv

@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+function usage {
+    echo
+    echo -e "Usage: copy_user_config.sh <server>"
+    echo
+    echo "Example - copy_user_config.sh n1pvir001"
+    exit
+}
+
+if [ -n "$1" ]; then
+    var="$1"
+else
+    usage
+fi
+
+server=$1
+
+scp -oStrictHostKeyChecking=no ~//configs/.bash* ${server}:~//
+
+

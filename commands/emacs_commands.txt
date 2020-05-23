@@ -1,0 +1,13 @@
+Cut to beginging of line:
+ 
+       C-k
+
+Instert at begining of line:
+	M-< M-x replace-regexp RET ^ RET $STRING RET
+
+Insert a random chracater at a random column on every line
+i.e  - Insert a "," at the 5th column on every line:
+     M-< M-x replace-regexp RET ^.\{5\} -> \&,
+
+Sort selected lines:
+     M-x sort-lines

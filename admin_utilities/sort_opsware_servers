@@ -1,0 +1,50 @@
+#!/usr/bin/python
+
+import argparse
+import commands
+import re
+
+# Create the CLI parser
+parser = argparse.ArgumentParser(description='Sort a list of servers by OS and ENV',
+                                 formatter_class=argparse.RawTextHelpFormatter)
+
+# Get the JSON input
+parser.add_argument('filename', help='The name of the file containing the list of servers')
+
+args = parser.parse_args()
+
+filein = args.filename  # type: object
+
+os_dict = ["aix", "centos", "oracle", "redhat", "sunos", "suse"]
+for o in os_dict:
+
+    # Get server info by OS
+    get_os = commands.getoutput("cat '" + filein + "' | grep -i " + o + " | awk -F, '{print $1}'")
+
+    env_dict = ["b", "c", "d", "p", "q", "t"]
+    for e in env_dict:
+        env = e
+        if env == 'b':
+            os_out =(o + "_dr")
+        if env == 'c':
+            os_out = (o + "_cat")
+        if env == 'd':
+            os_out = (o + "_dev")
+        if env == 'p':
+            os_out = (o + "_prod")
+        if env == 'q':
+            os_out = (o + "_qa")
+        if env == 't':
+            os_out = (o + "_test")
+
+        os_regex = r"^[A-Za-z][A-Za-z1-9]" + env + ".*$"
+        lines = get_os.splitlines()
+        for line in lines[1:]:
+            match = re.search(os_regex, line)
+            if match is None:
+                pass
+            else:
+                with open(os_out + ".csv", "a") as write_file:
+                    data = match.group()
+                    write_file.write(data)
+                    write_file.write("\n")

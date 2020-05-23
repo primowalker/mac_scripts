@@ -1,0 +1,61 @@
+#!/bin/ksh
+
+primeno()
+	{
+	  typeset num=$1
+	  typeset file=$2
+          typeset sqrt=`echo $num | awk '{print sqrt($1)}'`
+	  typeset sqrt=`echo $sqrt | awk '{print int($1)}'`
+
+	  typeset divisor=0
+	  typeset div=2
+	  typeset flag=0
+	  readline=1
+	  while [ $div -le $sqrt -a $flag -eq 0 ];
+	  do 
+		echo $num $div | awk '{OFMT="%.88g"} {print $1/$2}' | grep '\.' >/dev/null 2>&1
+		if [ $? -ne 0 ]; then
+		  flag=1
+		  divisor=$div
+		fi
+   		((readline+=1))
+		div=`sed -n ''$readline'p' $file`
+	  done
+	  echo $divisor
+	}
+
+file=/tmp/primes.$$
+num=$1
+[ "$num" = "" ] && num=0
+expr $num + 1 > /dev/null 2>&1
+[ $? -ne 0 ] && echo "Usage: `basename $0` <integer>" && exit 3
+sqrt=`echo $num | awk '{print sqrt($1)}'`
+echo $sqrt | grep '\.' > /dev/null
+[ $? -ne 0 ] && echo "\n$num is not a prime number - it is the perfect square of $sqrt\n" && exit 0
+
+sqrt=`echo $sqrt | awk '{print int($1)}'`
+echo Searching prime numbers till $sqrt...
+div=2
+echo $div > $file
+prtline=0
+flag=0
+echo "Trying to divide $num by the following prime numbers:"
+while [ $div -le $sqrt -a $flag -eq 0 ];
+do
+   if [ `primeno $div $file` -eq 0 ]; then
+	echo "$div	\c"
+	[ $div -ne 2 ] && echo $div>>$file
+	((prtline+=1))
+	[ $prtline -eq 5 ] && echo $div $sqrt | awk '{OFMT="%.4g"} {printf "Finished at least %s%",$1/$2*100}' && prtline=0 && echo 
+	echo $num $div | awk '{OFMT="%.88g"} {print $1/$2}' | grep '\.' > /dev/null 2>&1
+	if [ $? -ne 0 ]; then
+	  divisor=`expr $num / $div`
+	  echo "\n\n$num is not a prime number - it is divisible by $div and $divisor.\n" 
+	  rm -f $file
+	  exit 0
+	fi
+   fi
+   [ $div -eq 2 ] && ((div+=1)) || ((div+=2))
+done
+rm -f $file
+echo "\n\n$num is a prime number!\n"

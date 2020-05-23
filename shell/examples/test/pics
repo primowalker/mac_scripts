@@ -1,0 +1,57 @@
+#!/bin/sh
+
+TODAY=`date +%m-%d-%y.%H:%M`
+
+#Change to working directory
+cd /home/jayw/stuff/archive
+
+#Check to see if the archive.tar file exist.  If not, create it.
+echo Checking for existance of backup archive...
+if [ ! -f archive.tar ]; then
+#Create tar file and add images
+  echo Image archive not found, creating backup archive...
+  tar -cfv archive.tar backup.txt
+        count=0                                                         # Initialise a counter
+	echo "Creating archive file........"			   # Display the result
+	while [ $count -lt 5 ]						# Set up a loop control
+	   do                                                              # Begin the loop
+             count=`expr $count + 1`					 # Increment the counter
+             echo ".................."
+	   done
+  echo Archive created!
+else
+echo Archive found!
+fi
+
+#Add images to archive.tar file
+
+echo
+echo
+echo Looking for image files to archive...
+echo
+echo
+echo
+
+#Check for existance of *.jpg files
+    if [ -f *.jpg ]; then
+      echo Checking for existance of JPG files	
+      echo Found JPG files, adding to archive...
+
+      for file in *.jpg
+do
+   mv "$file" "$TODAY.$file"
+done
+
+      tar ufv archive.tar *.jpg
+      rm *.jpg
+    fi
+
+count=0                                                         # Initialise a counter
+	echo "Removing files........"			   # Display the result
+	while [ $count -lt 5 ]						# Set up a loop control
+	   do                                                              # Begin the loop
+             count=`expr $count + 1`					 # Increment the counter
+             echo ".................."
+	   done
+
+echo Operation complete!

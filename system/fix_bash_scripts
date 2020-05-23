@@ -1,0 +1,38 @@
+#!/bin/bash
+
+# Find the path to bash
+bash_path=`which bash`
+
+
+# Test to make sure that the path to the scripts is specified
+if [ -n "$1" ]; then
+        var="$1"
+    else
+        echo
+        echo "Usage: fix_bash_scripts <path to search>"
+        echo 
+        echo "Example - fix_bash_scripts /myscripts"
+        exit
+    fi
+
+# Get the script file names
+scripts=`find $1 -type f -name '*.sh'`
+
+# Check to see if "#!<path-to-bash>" is in the file.
+for i in $scripts; do
+	checkfiles=`grep bash $i | grep \!`
+	# If the file doesn't have the path-to-bash, fix it
+	if [ -z $checkfiles ];then 
+		echo "Fixing $i"
+		#sed -i '1i\#\!\/bin\/bash' $i
+		sed -i '1i\#\!'${bash_path}'' $i
+	fi
+done
+
+# Remove the ".sh" from the end of the file so we can run the scripts as if they are UNIX commands.
+for i in $scripts;do
+	newname=`echo $i | awk -F. '{print $1}'`
+	mv $i $newname
+done
+
+

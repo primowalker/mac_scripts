@@ -1,0 +1,37 @@
+#!/bin/sh
+#
+   if [ -n "$1" ]; then
+        var="$1"
+    else
+        echo
+        echo Usage: "mount_iso <ISO file name> <mount point>"
+        echo
+        echo All of the above arguments must be fully qualified path names
+        echo Example - mount_iso /iso/coolfile.iso /coolstuff
+        exit
+    fi
+
+ if [ -n "$2" ]; then
+        var="$2"
+    else
+        echo
+        echo Usage: "mount_iso <ISO file name> <mount point>"
+        echo 
+        echo All of the above arguments must be fully qualified path names
+        echo Example - mount_iso /iso/coolfile.iso /coolstuff
+        exit
+    fi
+
+
+# "$1" = iso file name - must be a fully qualified path name
+# "$2" = mount point - must be a fully qualified path name
+# device = The value returned from the lofiadm command
+
+#Make a directory to use as a mount point
+mkdir "$2"
+
+#Run the lofiadm command to create a device in /dev/lofi than can then be mounted so that the contents of the ISO file can be read as a normail file system.  Get the path and assign it to the $device variable.
+device=`lofiadm -a "$1"` 
+
+#Mount the device on /dev/lofi/<device #> to the mount point specified in the command line argument.
+mount -F hsfs $device "$2"

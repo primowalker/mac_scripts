@@ -1,0 +1,28 @@
+#!/usr/dist/local/exe/perl
+
+die "Usage : mailus [\"]Subject[\"]   mailfile   [listfile]\n" if (($#ARGV > 2) || ($#ARGV < 0));
+
+$list = "./list";
+$list = $ARGV[2] if ($#ARGV == 2);
+
+print "The file : \"$ARGV[1]\" with Subject Header : \"$ARGV[0]\" will be mailed to all entries in the file : \"$list\" \n";
+print "Are you sure you want to mail this ? (y/n) 	";
+$ans = <STDIN>;
+chop ($ans);
+exit if ($ans ne "y");
+     
+open (LIST, $list);
+while (<LIST>)
+   {
+     next if /^\#/;
+     next if /^$/;
+
+     open (MAIL, "|mail -s \"$ARGV[0]\" $_");
+     open (SEND, $ARGV[1]);
+     while (<SEND>)
+       {
+	 print MAIL $_;
+       }
+     close (SEND);
+     close (MAIL);
+   }

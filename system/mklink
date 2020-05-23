@@ -1,0 +1,25 @@
+#!/bin/bash
+
+if [ -n "$1" ];then 
+
+        LINK="$1"
+else    
+        echo "USAGE:"
+	echo 
+	echo "mklink.sh <link> <text>"
+	echo Example - "mklink.sh http://google.com Google"
+	exit
+fi
+
+if [ -n "$2" ];then 
+
+        TEXT="$2"
+else    
+        echo "USAGE:"
+	echo 
+	echo "mklink.sh <link> <text"
+	echo Example - "mklink.sh http://google.com Google"
+	exit
+fi
+
+echo "<a href=\"$LINK\">$TEXT</a>"

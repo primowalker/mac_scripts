@@ -1,0 +1,62 @@
+#!/bin/ksh
+
+usage()
+       {
+	 echo "\nUsage: $0 [ from_time [to_time] ]\nfrom_time and to_time are of the form hhmmss"
+	 case $1 in 
+	     2) echo "from_time has to be earlier than to_time";;
+	     3) echo "Invalid Time - $2";;
+	     4) echo "Invalid Hour - $2.  Hour has to be 00 to 23";;
+	     5) echo "Invalid Minute - $2.  Minute has to be 00 to 59";;
+	     6) echo "Invalid Second - $2.  Second has to be 00 to 59";;
+	 esac
+	 echo ""
+       }
+
+from=$1
+to=$2
+
+[ ${#from} -eq 0 ] && echo Setting from_time to 00:00:00 && from=000000
+[ ${#to} -eq 0 ] && echo "Setting to_time  to  `date +%H\:%M\:%S`" && to=`date +%H%M%S`
+
+[ ${#from} -eq 4 ] && from="${from}00"
+[ ${#to} -ne 6 ] &&  to="${to}00"
+[ ${#from} -ne 6 ] && usage 3 $from && exit
+[ ${#to} -ne 6 ] && usage 3 $to && exit
+expr $from + 1 > /dev/null 2>&1
+[ $? -ne 0 ] && usage 3 $from && exit
+expr $to + 1 > /dev/null 2>&1
+[ $? -ne 0 ] && usage 3 $to && exit
+[ $from -gt $to ] && usage 2 && exit
+
+frmhour=`echo $from | cut -c1-2`
+frommin=`echo $from | cut -c3,4`
+fromsec=`echo $from | cut -c5,6`
+
+[ $frmhour -lt 0 -o $frmhour -gt 23 ] && usage 4 $frmhour && exit
+[ $frommin -lt 0 -o $frommin -gt 59 ] && usage 5 $frommin && exit
+[ $fromsec -lt 0 -o $fromsec -gt 59 ] && usage 6 $fromsec && exit
+
+tohour=`echo $to | cut -c1-2`
+to_min=`echo $to | cut -c3,4`
+to_sec=`echo $to | cut -c5,6`
+
+[ $tohour -lt 0 -o $tohour -gt 23 ] && usage 4 $tohour && exit
+[ $to_min -lt 0 -o $to_min -gt 59 ] && usage 5 $to_min && exit
+[ $to_sec -lt 0 -o $to_sec -gt 59 ] && usage 6 $to_sec && exit
+
+orighr=$tohour
+origmin=$to_min
+origsec=$to_sec
+
+[ $fromsec -gt $to_sec ] && ((to_sec+=60)) && ((to_min-=1))
+[ $frommin -gt $to_min ] && ((to_min+=60)) && ((tohour-=1))
+((secdiff=to_sec-fromsec))
+((mindiff=to_min-frommin))
+((hrdiff=tohour-frmhour))
+
+[ $secdiff -le 9 ] && secdiff="0$secdiff"
+[ $mindiff -le 9 ] && mindiff="0$mindiff"
+[ $hrdiff -le 9 ] && hrdiff="0$hrdiff"
+
+echo "\nThe difference in time from $frmhour:$frommin:$fromsec to $orighr:$origmin:$origsec is $hrdiff:$mindiff:$secdiff\n"

@@ -1,0 +1,5 @@
+#!/bin/bash
+#
+# mvtor.sh move torrent files from the ~/Downloads folder 
+# to the ~/Downloads/torrents folder
+mv ~/Downloads/*.torrent ~/Downloads/torrents/

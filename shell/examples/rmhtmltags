@@ -1,0 +1,17 @@
+#!/bin/sh
+#rmhtmltags - removes html tags from a file
+
+    if [ -n "$1" ]; then
+        var="$1"
+    else
+        echo
+        echo Usage: "rmhtmltags <file>"
+        echo 
+        echo Example - rmhtmltags "index.html"
+        exit
+    fi
+
+#$1 = file
+
+#Run sed to remove html tags from file $1
+sed -e 's/<.*>//g' $1 >> $1.new

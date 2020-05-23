@@ -1,0 +1,7 @@
+#!/bin/ksh
+
+mnth=`date +%m`
+year=`date +%Y`
+((prvmnth=mnth-1))
+[ $prvmnth -eq 0 ] && prvmnth=12 && ((year-=1))
+cal $prvmnth $year

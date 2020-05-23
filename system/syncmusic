@@ -1,0 +1,3 @@
+#!/usr/bin/bash
+
+rsync -avP ~/Music/* --exclude "The\ Dark\ Side\ of\ the\ Moon\ \(Deluxe\ Experi/The\ Dark\ Side\ of\ the\ Moon\ \(Deluxe\ E.itlp/" --exclude "The Wall (Deluxe Experience Edition.itlp" jpwalker@192.168.0.48:/export/data/music/

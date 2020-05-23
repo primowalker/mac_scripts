@@ -1,0 +1,155 @@
+#!/bin/bash
+
+db_host="secamer"
+db_data="isops"
+db_sql='select name from serv where id > 9 and active = 1 and `ignore` = 0'
+
+#----------------------------------------------------------------------
+
+function help {
+	echo "blaster v0.1"
+	echo "runs some commands on a large number of servers utalizing SSH as the transport mechinizm."
+	echo
+	echo "blast.sh [-s] [-t] [[script]..] -"
+	echo
+	echo "-i      Select IP addresses, not name"
+	echo "-s      SQL to select rows with"
+	echo "--sudo  'sudo' the command"
+	echo "-t      Type of system (env where clause)"
+	echo "-w      SQL where clause addition"
+	echo "-       Treate the remaining parms as the remote command"
+	echo "--      Treate the remaining parms as the local command"
+    echo "            %HOST% will be replaced with the hosts name"
+}
+
+#----------------------------------------------------------------------
+
+while [ -n "$1" ]; do
+	case $1 in 
+		-i )
+			# select ipv4
+			db_sql=$(echo "${db_sql}" | sed 's/select name /select ipv4 /')
+			;;
+		-s )
+			# sql to get rows
+			db_sql=$2 && shift
+			;;
+		-t )
+			# type of systems
+			db_sql="${db_sql} and env = '$2'" && shift
+			;;
+		-w )
+			# SQL Where clause
+			db_sql="${db_sql} and $2" && shift
+			;;
+		--sudo )
+			# activate sudo on remote end
+			sudo=sudo
+			;;
+		- )
+			# process command line as remote command
+			while [ -n "$2" ]; do
+				rcmd="${rcmd} $2" && shift
+			done
+			;;
+		-- )
+			# process command line as local command
+			while [ -n "$2" ]; do
+				lcmd="${lcmd} $2" && shift
+			done
+			;;
+		* )
+			scripts="${scripts} $1"
+			;;
+	esac
+	shift
+done
+
+if [ -z "${lcmd}" -a -z "${rcmd}" -a -z "${scripts}" ]; then
+	help
+	exit
+fi
+
+# Pull the database for host list ---------------
+
+hosts=$(mysql -s -h ${db_host} -D ${db_data} -e "${db_sql}" | sort)
+if [ $? -ne 0 ]; then
+	echo "Error with db - [${db_sql}]"
+	exit
+fi
+if [ -z "${hosts}" ]; then
+	echo "No hosts returned"
+	exit
+fi
+
+# Process the hosts -----------------------------
+
+for host in ${hosts} ; do
+
+	buffer="================================================================================================================================================="
+	headder="[${host}] $(date '+%F %R') "
+#	echo ${#headder}
+#	length=$(($COLUMNS - ${#headder}))
+#	echo $length
+#	headder="${headder}${buffer:0:$length}"
+
+	echo "$headder"
+
+	# on some systems, truncate the user name to 8 chars
+
+	ssh_user=$(whoami)
+	if [ \
+		"${host}" = "europe.kc.saionline.com" -o \
+		"${host}" = "russia-dr.kc.saionline.com" \
+		]; then
+		ssh_user="${ssh_user:0:8}"
+	fi
+
+	# determine the ostype specifics
+
+	ostype=$(ssh -q ${ssh_user}@${host} uname | cut -d ' ' -f 1)
+	if [ $? -eq 0 ]; then
+
+		if [ -n "${scripts}" ]; then
+	
+			# Loop through each passed script
+
+			for script in ${scripts} ; do
+
+				# Get a temp file
+				if [ ${ostype:0:3} = "aix" ]; then
+					tempscript="/tmp/${script##*/}"
+				else
+					tempscript=$(ssh ${ssh_user}@${host} mktemp 2> /dev/null)
+				fi
+
+				# Copy the script over
+				scp -q "${script}" ${ssh_user}@${host}:"${tempscript}"
+				ssh ${ssh_user}@${host} "chmod u+x '${tempscript}'" 2>&1 | grep -v '^##'
+
+				# Run and remove
+				ssh ${ssh_user}@${host} $sudo ${tempscript} 2>&1 | grep -v '^##'
+				ssh ${ssh_user}@${host} rm "'${tempscript}'" 2>&1 | grep -v '^##'
+
+			done
+
+		elif [ -n "${rcmd}" ]; then
+
+			# Just ssh and run
+
+			ssh -t -o ConnectTimeout=30 ${ssh_user}@${host} "${sudo} ${rcmd}" 2>&1 | grep -v '^##'
+
+		elif [ -n "${lcmd}" ]; then
+
+			# No ssh, but replace some vars
+
+			cmd="${lcmd}"
+			cmd=$(echo "${cmd}" | sed "s/\%HOST\%/${ssh_user}\@${host}/")
+			cmd=$(echo "${cmd}" | sed "s|\%RSYNC\%|${_rsync}|")
+
+			${cmd} 2>&1 | grep -v '^##'
+
+		fi
+	fi
+	echo
+done

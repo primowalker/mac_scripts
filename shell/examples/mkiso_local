@@ -1,0 +1,55 @@
+#!/bin/sh
+#
+    if [ -n "$1" ]; then
+        var="$1"
+    else
+        echo
+        echo Usage: "mkiso <ISO file name> <path to file to be archived> <mount point>"
+        echo 
+        echo All of the above arguments must be fully qualified path names
+        echo Example - mkiso /iso/coolfile.iso /myfiles /coolstuff
+        exit
+    fi
+
+ if [ -n "$2" ]; then
+        var="$2"
+    else
+        echo
+        echo Usage: "mkiso <ISO file name> <path to file to be archived> <mount point>"
+        echo
+        echo All of the above arguments must be fully qualified path names
+        echo Example - mkiso /iso/coolfile.iso /myfiles /coolstuff
+        exit
+    fi
+
+ if [ -n "$3" ]; then
+        var="$3"
+    else
+        echo
+        echo Usage: "mkiso <ISO file name> <path to file to be archived> <mount point>"
+        echo 
+        echo All of the above arguments must be fully qualified path names
+        echo Example - mkiso /iso/coolfile.iso /myfiles /coolstuff
+        exit
+    fi
+
+
+# "$1" = iso file name - must be a fully qualified path name
+# "$2" = path to files to archive - must be a fully qualified path name 
+# "$3" = mount point - must be a fully qualified path name
+# device = The value returned from the lofiadm command
+
+#Run mkisofs to create the ISO file.
+mkisofs  -log-file /tmp/iso-messages.log -v -a -R -l -o "$1" "$2"
+
+#Make a directory to use as a mount point
+mkdir "$3"
+
+#Run the lofiadm command to create a device in /dev/lofi than can then be mounted so that the contents of the ISO file can be read as a normail file system.  Get the path and assign it to the $device variable.
+device=`lofiadm -a "$1"` 
+
+#Mount the device on /dev/lofi/<device #> to the mount point specified in the command line argument.
+mount -F hsfs $device "$3"
+
+#Check iso logfile for errors
+grep err /tmp/iso-messages.log

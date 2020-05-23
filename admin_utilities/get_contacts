@@ -1,0 +1,14 @@
+#!/bin/bash
+
+if [ -n "$1" ]; then
+        var="$1"
+else
+    echo
+    echo "Usage: <get_contacts.sh> <name>"
+    echo
+    echo "Example - get_contacts.sh James"
+    exit
+fi
+
+column -c '24' -t -s $',' ~//scripts/active/dslinux_contacts.csv | grep Name
+column -c '24' -t -s $',' ~//scripts/active/dslinux_contacts.csv | grep -i $1

@@ -1,0 +1,1 @@
+df -h | grep -v map | grep -v fs | grep -v localhost | awk '{print $1 "\t " $3 "\t" $4 "\t" $5 "\t" $9}'

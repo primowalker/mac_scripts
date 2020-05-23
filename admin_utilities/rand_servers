@@ -1,0 +1,27 @@
+#!/bin/bash
+
+infile=$1
+numservers=$2
+
+if [ -n "$infile" ]; then
+        var="$infile"
+else
+    echo
+    echo "Usage: <rand_servers.sh> <input file> <number of servers>"
+    echo
+    echo "Example - rand_servers.sh prod_servers 500"
+    exit
+fi
+
+if [ -n "$numservers" ]; then
+        var="$numservers"
+else
+    echo
+    echo "Usage: <rand_servers.sh> <input file> <number of servers>"
+    echo
+    echo "Example - rand_servers.sh prod_servers 500"
+    exit
+fi
+
+
+sort -R $infile | grep -iv '^a' | grep -iv '^s' | grep -iv '^w' | head -n $numservers

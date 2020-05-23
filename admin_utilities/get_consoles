@@ -1,0 +1,10 @@
+#!/bin/bash
+
+if [ $# -eq 0 ]; then
+    echo "Please provide a server name to process."
+    exit 1
+fi
+
+server=$1
+
+grep -i $server ~/bin/Linux_console_info.csv | awk -F, '{print $1 "\t" $2 "\t" $3}'

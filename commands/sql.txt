@@ -1,0 +1,3 @@
+mysql -u jpwalker -p'Sk3pt!c@l' -e "SELECT artist,title FROM songs WHERE artist LIKE '%beatles%' AND title IS NOT NULL" music
+
+mysql -u root -p'Sk3pt!c@l' -e "SELECT artist,title FROM songs WHERE title IS NOT NULL INTO OUTFILE '/tmp/all_songs.csv' FIELDS TERMINATED BY ',' LINES TERMINATED BY '\n'" music

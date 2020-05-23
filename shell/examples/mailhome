@@ -1,0 +1,36 @@
+#!/bin/sh
+
+#Get the subject
+    if [ -n "$1" ]; then
+        var="$1"
+    else
+        echo
+        echo Usage: "mailit <subject> <body text> "
+        echo 
+        echo Example - mailit "Hi its me" "Please call me when you can"
+        exit
+    fi
+
+#Get the body text
+if [ -n "$2" ]; then
+        var="$2"
+    else
+        echo
+        echo Usage: "mailit <subject> <body text>"
+        echo 
+        echo Example - mailit "Hi its me" "Please call me when you can" 
+        exit
+    fi
+
+#$1 = subject
+#$2 = body text
+
+#Write tempory file
+echo "$2" >> tmpfile
+
+#Run mailx to send message
+mailx -s "$1" james_walker1960@yahoo.com < tmpfile
+
+#Remove the temporary file
+rm tmpfile 
+

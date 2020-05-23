@@ -1,0 +1,8 @@
+Ctrl+Shift+C: Copy
+Ctrl+Shift+V: Paste
+Ctrl+Shift+N: New
+Ctrl+Shift+Q: Close
+Ctrl+Shift+R: Reset
+Ctrl+Shift+D: Default size
+Ctrl+Shift+F: Full screen
+Ctrl+Shift+S: Flip screen

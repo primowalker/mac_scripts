@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+
+function usage {
+    echo
+    echo -e "Usage: copy_user_config-multiple_servers.sh <file>"
+    echo
+    echo "Example - copy_user_config-multiple_servers.sh servers_list"
+    exit
+}
+
+if [ -n "$1" ]; then
+    var="$1"
+else
+    usage
+fi
+
+server_list=$1
+servers=`cat $server_list`
+
+if [ -f "copy_user_config_status.csv" ];then
+    rm copy_user_config_status.csv
+fi
+
+for i in $servers;do
+    scp -q -o StrictHostKeyChecking=no -o ConnectTimeout=5 ~//configs/.bash* ${i}:~//
+    err_code=`echo $?`
+    if [ "$err_code" = "0" ];then
+        echo "$i,Success" | tee -a copy_user_config_status.csv
+    else
+
+        echo "$i,Connection timed out" | tee -a copy_user_config_status.csv
+    fi
+done

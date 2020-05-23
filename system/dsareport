@@ -1,0 +1,12 @@
+#!/bin/bash
+gunzip *.gz
+SerialNumber=`ls *.xml | awk -F_ '{print $2}'`
+
+for i in $SerialNumber;do
+    grep -A6 PartNumber '*${i}*.xml'
+    grep -A1 FRUNumber '*${i}*.xml'
+    grep 'Part Number' '*${i}*.xml'
+    grep 'IBM FRU/CRU' '*${i}*.xml'
+    grep 'Controller FRU' '*${i}*.xml'
+    grep 'Battery FRU' '*${i}*.xml'
+done

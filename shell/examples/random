@@ -1,0 +1,13 @@
+#!/bin/ksh
+
+[ $# -ne 1 ] && echo "Usage: $0 <number>\nwhere number is an integer from 1 to 100" && exit
+loop=$1
+line=1
+while [ $loop -gt 0 ];
+do
+    echo "$RANDOM\t\c"
+    ((line+=1))
+    [ $line -eq 6 ] && echo "" && line=1
+    ((loop-=1))
+done
+[ $line -ne 1 ] && echo ""

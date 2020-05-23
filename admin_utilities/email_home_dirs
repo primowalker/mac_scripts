@@ -1,0 +1,26 @@
+#!/bin/bash
+
+if [ $# -eq 0 ]; then
+    echo -e "Usage: homedirs.pl host size ID email name\n"
+	echo -e "homedirs.pl r3qvap1029 2226.91MB f3l3kmt Wai.Hein\@firstdata.com \"Wai Yan Hein\"\n"
+    exit 1
+fi
+
+host=$1
+size=$2
+id=$3
+email=$4
+name=$5
+	
+subject="Re: your home directory on $host"
+
+body="\nHello $name,\n\nThe /home directory on $host is running low on disk space. The home directory with your User ID, /home/$id, is currently using $size of disk space.\n\nPlease log into $host and clean up as many files as possible to free up disk space.\n\nIf you have any questions, please let me know.\n\nJames Walker\n\nFirst Data\nUnix Service Delivery – X2LINUX_GFS, X2Linux_GBS, X2Linux_NSS, X2UNIX_GBS, X2UNIX_GFS, X2Unix_NSS"
+
+#Write tempory file
+echo -e "$body" >> tmpfile
+
+#Run mailx to send message
+mailx -s "$subject" "$email" < tmpfile
+
+#Remove the temporary file
+rm tmpfile

@@ -1,0 +1,124 @@
+# cmd_list.dat
+# This file contains useful Linux commands. Each line consist of three colon seperated fields: Keywords, Description of command, the command it's self.
+# Keyword:Description:Command
+# Keywords are seperated by semi-colons.
+# This data file is read by the get_commands.sh script that takes a keyword and an argument and parses out the matching lines and displays them.  
+# This file can be read by any program or script that can read a colon seperated file format
+
+all;alert;resonding;management;snmp:Alert: {host} is no longer responding to primary management requests (e.g. SNMP):/etc/init.d/CA-SystemEDGE restart
+all;awk;line;print:Print awk output all on the same line:awk '{ printf "%s ", $0}'
+all;awk;collumns;remove:Remove collumns using awk. i.e to remove collumns 2 and 3:awk 'BEGIN { FS=","; OFS="," } {$2=$3="";gsub(",+",",",$0)}1'
+all;clean;postfix;queue:To clean the queue of the postfix mail server:postfix f
+all;clientmqueue;space;cleanup;find:To clean up /var/spool/clientmqueuecd /var/spool/clientmqueue: find /var/spool/clientmqueue -type f | xargs rm
+all;connect;direct;cdpmgr;cduser;cdstart:To start Connect Direct (cdpmgr):su - cduser;/opt/cduser/ndm/bin/./cdstart
+all;cpu;top 10;processes;awk;head:Get the top 10 processes using the most CPU:top -bn3 -d 00.05 | awk '{print $9 "\t" $1 "\t" $2 "\t" $12}' | grep -Ev '(top|Tasks|Cpu|Mem|Swap)' | head -10
+all;cpu;usage;processes:Find the top processes using CPU and the full path to those processes:top -bn3 -d 00.05 | awk '{print $9 "\t" $1 "\t" $2 "\t" $12}' | grep -Ev '(top|Tasks|Cpu|Mem|Swap)' | head -10 | tee /root/cpu_usage;echo;for i in `cat cpu_usage | grep -v CPU | awk '{print $2}'| head -5`;do ps auxwe | grep $i | grep -v grep | awk '{print $1 "\t" $2 "\t" $11}';done
+all;cpu;usage:Get the total percentage of CPU usage:top -bn2 -d 00.05 | grep "Cpu(s)" | tail -1 | sed "s/.*, *\([0-9.]*\)%* id.*/\1/" | sed 's/%us,//g' | sed 's/%sy,//g' | awk '{ print "CPU Usage: " $2+$3 "%"; }'
+all;cpu;usage;sar:Get a quick CPU usage history from sar:sar | awk '{sum = 100 - $8 ; print $1 "\t" sum"%"}'
+all;cpu;processes;number:Get the number of processes in a server:cat /proc/cpuinfo | grep processor | wc -l
+all;cron;processes;kill;alert:Cron process has exceeded 10 instances:ps -ef | grep -w cron | grep -v grep | awk '{print $2}' | wc -l;for i in `ps -ef | grep -w cron | grep -v grep | awk '{print $2}' | tail -7`;do kill $i;done
+all;delete;line;vi;vim:To deleted from the current line to the top of the file:d gg
+all;delete;vi;vim;empty;line:Delete all empty line in a file using vi:g/^$/d
+all;delete;vi;vim;line:Delete from the current line to a number line below::,<line number>d i.e. ,127d
+all;df;disk;usage;aix:Get df output and sort by disk usage - AIX:df -g | awk '{print $4 "\t" $1 "\t" $7}' | grep -v Filesystem | sort -n
+all;df;disk;usage;linux;solaris:Get df output and sort by disk usage - Linux:df -h | awk '{print $5 "\t" $1 "\t" $6}' | grep -v Filesystem | sort -n
+all;df;du;difference:Reported file system usage from df will differ from the usage from du.This is usually caused when a file or files have been deleted, but the process that was using those files is still open.  To find out what process is holding that open do:lsof /var | grep deleted
+all;df;du;pretty:To make the output of df or another command pretty:/bin/df -hP | awk '{ printf "%-20s %-40s\n", $6, $4}'
+all;disk;filesystem;lvm;lvcreate:Create a new volume:lvcreate -L 180G -n javalv /dev/appvg
+all;disk;filesystem;lvm;lvextend:Extend an existing volume:lvextend -L +9G dev/appvg/javalv
+all;disk;filesystem;lvm;pvcreate:Add a new LUN to LVM:pvcreate /dev/sde
+all;disk;filesystem;lvm;vgextend:Extend a volume group:vgextend appvg /dev/sde
+all;disk;usage;space:Dump a list of every directory on the filesystem prefixed with the number of files (and subdirectories) in that directory. Thus the directory with the largest number of files will be at the bottom:find / -xdev -printf '%h\n' | sort | uniq -c | sort -k 1 -n
+all;disk;UUID:To get the UUID of a disk:lsblk -f
+all;disk;UUID:To get the UUID of all physcial disks mounted in a server:for i in `grep /dev/sd /etc/fstab | awk '{print $1}'`;do lsblk -fn $i;done
+all;du;size;file;space:Find space used only on the current file system:du -shd
+all;exclude;multiple;terms;grep:Exclude multiple terms from grep:for i in `ifconfig | awk '{print $1}' | grep -Ev '(UP|RX|TX|collisions|RX|in|In|lo)'`;do ethtool $i | grep Link;done
+all;fdisk;disk;volume;filesystem:Check the current status of disks attached to the server:fdisk -l | egrep '^Disk' |egrep -v 'dm-' 2> /dev/null | grep /dev/sd | sort
+all;fdisk;disk;volume;filesystem:Scan for new LUNs:for i in `ls /sys/class/scsi_host/`;do echo "- - -" > /sys/class/scsi_host/$i/scan;done
+all;file size;files;size;find:Check for files larger than a certain size:find /data -xdev -type f -size +1000000 -exec ls -al {} \;
+all;file;zero out;size:To zero out a file without deleting it:> FILENAME
+all;fsck;boot:Turn on/off fsck check on boot:tune2fs -i 0 -c 0 /dev/$VG/$FS
+all;get random files;ssh_servers;sort;grep;head:Get a certain number of random servers from ssh_servers file,  i.e. - get 500 random servers:sort -R ssh_servers | grep -iv '^a' | grep -iv '^s' | grep -iv '^w' | head -n 500
+all;grep;<>:Grep for "<" and/or ">":grep '<\|>'
+all;grep;servers;cat;duild;dev;qa;prod;test:Grep in a server list for CAT:cat servers_list.csv | grep -E '^(n|r|d|e)(1|3)c'
+all;grep;servers;cat;duild;dev;qa;prod;test:Grep in a server list for DR:cat servers_list.csv | grep -E '^(n|r|d|e)(1|3)b'
+all;grep;servers;cat;duild;dev;qa;prod;test:Grep in a server list for QA:cat servers_list.csv | grep -E '^(n|r|d|e)(1|3)q'
+all;grep;servers;cat;duild;dev;qa;prod;test:Grep in a server list for dev:cat servers_list.csv | grep -E '^(n|r|d|e)(1|3)d'
+all;grep;servers;cat;duild;dev;qa;prod;test:Grep in a server list for prod:cat servers_list.csv | grep -E '^(n|r|d|e)(1|3)p'
+all;grep;servers;cat;duild;dev;qa;prod;test:Grep in a server list for test:cat servers_list.csv | grep -E '^(n|r|d|e)(1|3)t'
+all;grep:If grep gives an error "binary file matches" when searching a file:grep -a
+all;group;vas;AD:To check AD groups that have access to a server:/opt/quest/bin/vastool list group <groupname>
+all;kill;jobs;stopped:To kill a stopped job,  where %X is the job number from the output of the jobs command:kill %X
+all;lines;combine:To combine two consecutive lines:awk '!(NR%2){print$0p}{p=$0}'
+all;linmon;owership;filesystem:To find out who owns a file system, look here:/opt/admin/linom/linmon_mntpts_teams.txt
+all;loop;script;while;continuous:To loop a command:x=1;while [ $x = 1 ];do <command>;sleep (x);done
+all;lsof;grep;deleted:Mismatch between df and du output:lsof /var | grep deleted
+all;mem;free:Get the amount of Free Memory:free | grep Mem |  awk '{size = $2/1024/1024 ; print " Total Free Memory " "\t" size" GB"}'
+all;mem;percentage;usage:Get the total percentage of Memory being used:mem_size=`top | head -5 | grep Mem | awk '{print $3}' | sed 's/k//g' | sed 's/M//g'`;mem_used=`top | head -5 | grep Mem | awk '{print $5}' | sed 's/k//g' | sed 's/M//g'`;echo;mem_perctage_used=`bc <<< "scale = 2;$mem_used / $mem_size"`;echo -e "The percentage of mem used is - $mem_perctage_used"
+all;mem;top 10;processes;ps;awk:Get the top 10 processes using the most memory(ps): ps aux --sort=-pmem | head -10
+all;mem;top 10;processes;awk:Get the top 10 processes uing the most memory(Top):top -bn3 -d 00.05 | awk '{print $10 "\t" $1 "\t" $2 "\t" $12}' | grep -Ev '(top|Tasks|Cpu|Mem|Swap)' | head -10
+all;dmesg;error;warn;fail:Do a quick sanity check of dmesg:dmesg | grep -Ei '(err|warn|fail)' | grep -Eiv '(interrupt|override)'
+all;messages;error;warn;fail:Do a quick sanity check of /var/log/messages:cat /var/log/messages | grep -Ei '(err|warn|fail)' | grep -Eiv '(interrupt|override|vas|syslog|auditd|vgptool)'
+all;mount;root;rw;read;write:Remount root rw:mount -o remount,rw /dev/rootvg/rootlv /
+all;mounted;filesystems;listing;df;sort:Get a listing of the mounted file systems and sort by % used:df -h | grep -v platform | awk '{print $5 "\t" $6}' | sort -n
+all;netstat;port:Check what is running on a port:netstat -tnpl | grep <port>
+all;network;port;connectivity;nc:Test connectivity to a port:nc -zv $HOST $PORT
+all;network;route;routes;static;ip:To see static routes:ip route
+all;network;NIC:To get the link status of all NICs:for i in `ifconfig | grep BROAD |awk '{print $1}'`;do ethtool $i | grep Link;done
+all;nfs;port;rpcinfo;awk:To check ports that need to be open for NFS shares:rpcinfo -p $NFS_HOST | awk '{print $4 "," $5}' | sort -n | uniq
+all;nfs;hung:To free up a hung NFS mount:mount -l
+all;nfs;hung;mount:o mount a NFS mount that is giving time out errors:mount -F
+all;path;process;ps:Get the full path to a process:ps auxwe | grep PID
+all;port;fuser:Find which processes is using a specific port:fuser 8880/tcp
+all;ps;realtime;process;ps:Use ps as a realtime process viewer:watch -n 1 'ps -e -o pid,uname,cmd,pmem,pcpu --sort=-pmem,-pcpu | head -15'
+all;qas;vmtools;login;users:Fix issue when users are not prompted to log in with 1DC credentials, only local:/opt/quest/bin/vastool -u unixserveradd -w T1x9Zppc6 join -f 1dc.com /etc/opt/quest/vas/host.keytab host/
+all;racli;imperva:Check the current version of Imperva:/opt/imperva/ragent/bin/racli
+all;read;only;ro;filesystem:Check for read only file systems:grep -w ro /proc/mounts
+all;remove to end of line;sed:To remove everything from a character or string to the end of the line. NOTE - The period before the wildcard * and the end of line $ is important!:sed 's/MyVar.*$//g'
+all;remove;<>;diff:Remove <> characters from diff output:diff file1 file2 | sed 's/<//g' | sed 's/>//g'
+all;remove;ctrl;dos;vi;vim:To remove CTRL-M characters in a file from withing vi/vim::%s/^M//g (To enter ^M, type CTRL-V, then CTRL-M. That is, hold down the CTRL key then press V and M in succession.)
+all;remove;delete;line;entire;vi;vim:To remove an entire line if a particular column is a duplicate:awk -F',' '!seen[$3]++' filename
+all;remove;empty;lines;grep;sed:To remove empty lines in output:grep -v \# <file> | sed '/^\s*$/d'
+all;remove;line numbers;diff:Remove the line numbers from diff output:​diff file1 file2 | grep -v "^---" | grep -v "^[0-9c0-9]"
+all;remove;spaces;whitespace;leading;sed:Remove leading whitespace from a file:sed "s/^[ \t]*//"
+all;replace;character;sed;return;carriage:Replace a character with a carriage return:sed -e $'s/;/\\\n,/g'
+all;search;text;multiple files;exclude;binary;var;log:Search for text in multiple files,  but exclude binary files. Very nice when searching through multiple log files in /var/log.:find . -type f -exec grep -Il sysmon {} \;
+all;scp:To scp between two servers with no open filewall between them. The flow passes through the server the scp command is run from:scp -3 server1:/mypath server2:/mypath
+all;sed:To replace everything between one character and another in using sed, i.e in the following line - d1bvdb1000.1dc.com,d1bvdb1000+Linmon-file-looks-good - replace everything between the (,) and (+):sed 's/,[^]]*+/,/g'  
+all;sed;variable:Use a variable in sed:sed "s|$var|,$var|g"
+all;sed;remove;line:To remove a line that contains a matching pattern:sed -i '/pattern to match/d' ./infile
+all;sed;insert;line:Use sed to insert a line into a file at a specific location(This will insert "relayhost = usomaappsmtp.1dc.com" into /etc/postfix/main.cf at line #319):sed -i '319i\relayhost = usomaappsmtp.1dc.com\' /etc/postfix/main.cf
+all;service;systemctl;Red Hat 7:To list services in Red Hat 7:systemctl list-units --type service --all
+all;size;files;directories;du;space;usage;sort;awk;sort:Get the sizes of files and directories and sort them from smallest to largest.:du -sk * | awk '{size = $1/1024 ; print size" MB" "\t" $2}' | sort -n
+all;start;ndm:To start NDM:su - cduser -c "/opt/cduser/cdunix/ndm/bin/cdstart"
+all;startup;shutdown;init;init.d;insserv;chkconfig:To add a startup/shutdown script:Copy the script to /etc/init.d.  For SLES run - insserv $SCRIPT. For RedHat/Cent OS run - chkconfig -add $SCRIPT
+all;su;command;user:Run a command as another user:su -c "ulimit -a | grep 'open files'" -s /bin/bash websrvr
+all;swap;devices:Get a list of current swap devices:swapon -s | grep -v File | awk '{ size = $3 /1024 ; print $1 "\t" size"G"}'
+all;swap;top 10;ps;awk;sort:Get the top 10 processes using the most swap space:printf "Swap Used \t User \t PID \t Command \n";ps -eo vsz,user,pid,args | sort -rn | head -10 | awk '{print $1 "\t\t" $2 "\t" $3 "\t" $4}'
+all;swap;percentage;usage:Get the total percentage of swap being used:total_swap=`free -m | grep Swap | awk '{print $2}'`;swap_used=`free -m | grep Swap | awk '{print $3}'`;swap_perctage_used=`bc <<< "scale = 2;$swap_used / $total_swap"`;echo -e "The percentage of swap used is - $swap_perctage_used"
+all;swap;total;used;free:Get the total amount of free swap:free | grep Swap |  awk '{size = $4/1024/1024 ; print " Total Swap Free" "\t" size" MB"}'
+all;swap;total;used;free:Get the total amount of swap:free | grep Swap |  awk '{size = $2/1024/1024 ; print " Total Swap " "\t" size" GB"}'
+all;systemctl;list;services:List all services on Red Hat 7.x systems:systemctl list-unit-files
+all;tr;dupicate;file:Remove duplicate words on a single line in a file:tr -s [:space:] \\n < filename  | sort | uniq
+all;user;account;locked;pam_tally:Check to see if the account has been locked.:pam_tally --user <user id>
+all;user;account;locked;pam_tally:To unlock the account.:pam_tally --user <user id> --reset
+all;user;account;locked;vastood;AD:Check user status in vastool.:/opt/quest/bin/vastool user checkaccess f8tg2la
+all;user;account;locked;vastood;AD:If vastool gives an error or doesn't return anything when checking the user status,  then restart the service.:/etc/init.d/vasd stop|start
+all;vastool;join;domain;qas:Joing a server to the 1DC domain:/opt/quest/bin/vastool -u unixserveradd -w T1x9Zppc6 join -f 1dc.com
+all;vastool;join;domain;qas;rejoin:To Rejoing a server to the domain:/opt/quest/bin/vastool -u unixserveradd -w T1x9Zppc6 join -f 1dc.com
+all;vastool;qas;1dc:List 1DC groups that have access to a server:/opt/quest/bin/vastool list groups
+all;vi;DOS;line feed;carrage return;non-printable;characters:To run vi show DOS line feed:vi -b
+all;vi;vim;dos;non-printable:Remove DOS line endings::set fileformat=unix
+all;vi;vim;non-printable;characters:Show all non-printable characters in vi::set list
+all;vim;vi;sed:To trim leading whitespace in vi, vim, or sed:s/^\s*//g
+all;vim;vi;word;case;upper:To change a word to uppercase in vi and vim:vEU
+all;vim;vi;word;case;lower:To change a word to lowercase:vEu
+all;vim;vi;all;case;upper:To change everything in a file to uppercase:ggVGU
+all;vim;vi;word;case;lower:To change everything in a file to lowercase:ggVGu
+all;vim;vi;sort:To sort line alphabetically:"colon" sort
+all;vm;vmware;networking;migration:For VM networking issues after a migration, check to see if the MAC address of the NICs have changed.  If so:Update /etc/udev/rules.d/30-net_persistent_names.rules
+all;vmware;vmtools:Chceck VM Tools version:grep -i '\$buildNr =' /usr/bin/vmware-config-tools.pl
+all;vmware;vmtools;download:Download VMTools Installers:http://n1pvir001/apps
+all;vmware;vmtools;uninstall:To uninstall VMware Tools in a Linux guest operating system:/usr/bin/vmware-uninstall-tools.pl
+all;vmware;ocnsole;scroll:To scroll up/down in VMWare console:SHIFT + Page Up / SHIFT + Page Down.
+all;xargs;find:Use xargs with find:find . -type f | xargs tar -czvf backup.tar.gz

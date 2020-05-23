@@ -1,0 +1,50 @@
+# cmd_list-AIX.dat
+# This file contains useful AIX commands. Each line consist of three colon seperated fields: Keywords, Description of command, the command it's self.
+# Keyword:Description:Command
+# Keywords are seperated by semi-colons.
+# This data file is read by the get_commands.sh script that takes a keyword and an argument and parses out the matching lines and displays them.  
+# This file can be read by any program or script that can read a colon seperated file format
+
+all;login;failed;count:Check unsuccessful user login counts:lsuser -a account_locked unsuccessful_login_count tpap0154
+all;login;failed;count;clear:Clear unsuccessful user login counts:chuser unsuccessful_login_count=0 tpap0154
+all;port;used:Check if a port on AIX is being used:netstat -an | grep LIST | grep <port>
+all;cpu;cores:Get the number of CPU cores in AIX:/usr/sbin/lsdev -C -c processor
+all;root;full;space:Places to check with / is getting full:/nsr/logs:/etc/perf/daily
+all;process;port:To find out which process is using a specific port:lsof -i :<port>
+all;errpt;error;detail:To get detailed information for a specific event from errpt:errpt -a -j <identifer>
+all;lpar;hmc:To get a list of all the lpars on an HMC, log into the HMC as hscroot and run:for i in `lssyscfg -r sys -F name`;do echo $i;lssyscfg -m $i -r lpar -F name,state --header;done
+all;cluster;info:To get information about an PowerHA cluster:cltopinfo
+all;cluster;start:To start cluster services:clmgr start node node1,node2
+all;cluster;state;info:To get the current state of the cluster nodes:clmgr -va name,state,raw_state query node
+all;cluster;info;basic:Get basic cluster info:clRGinfo
+all;console;lpar:To get to a console for an LPAR:Log into the HMC and run - vtmenu, then choose the Frame and LPAR. 
+all;restart;opsware:Restart Opsware daemon:/etc/rc.d/init.d/opsware-agent restart
+all;process;usage:Find High Usage Processes:svmon -P | perl -e 'while(<>){print if($.==2||$&&&!$s++);$.=0 if(/^-+$/)}' |head -n 10
+all;check;disk;path:Check disk paths:lspath
+all;path;disk;fix:Fix the failed path:chpath -l hdisk23 -p vscsi1 -s enable
+all;path;disk;failed;fix;multiple:If there are multiple failed paths, run a loop to fix them:for i in `lspath | grep "Failed" | grep vscsi0 | awk '{print $2}'`;do chpath -l $i -p vscsi0 -s enable;done
+all;check;disk;adapter:Check configured disk adapters:lsdev -Cc adapter | grep vscsi
+all;extend;dump;space:Extend dump space:extendlv lg_dumplv (PPs) 
+all;check;dump;size:Check new dump device size:sysdumpdev –e
+all;increase;filesystem;fs:To increase the size of a file system by 512M:chfs -a size=+512M /opt
+all;password;change;user:To change a user's password:echo "f5m1kzz:today1" | chpasswd -c
+all;check;swap:To check swap/paging space:lsps -a
+all;swap;space;top:To see the top 10 processes using swap:svmon -P -O summary=basic,unit=MB,sortentity=pgsp | head -10
+all;service;status;check:To list the status of a service:lssrc 
+all;service;start;stop:To start/stop services:startrc:stoprc
+all;emc;path;dead:If you get dead EMC paths, to check run:powermt display dev=all | egrep -p "hdiskxx"
+all;emc;path;restore:If there are no indicated HW issues, run the following command to try to recover the dead links:powermt restore dev=all
+all;emc;path;restore:If there is a HW issue, once that is fixed, run:powermt restore dev=all 
+all;emc;path;delete;config:Delete any dead paths, and to reconfigure them again:powermt reset:powermt config
+all;emc;path;check:Check the EMC paths:powermt check
+all;swap;paging:To list out all paging spaces:lsps -a 
+all;swap;paging:To display the details of the paging space hd6:lsps hd6 
+all;swap;paging:To turn on the paging space paging00 on next reboot:chps -a y paging00 
+all;swap;paging:To turn off the paging space paging00 on next reboot:chps -a n paging00 
+all;swap;paging:To increase the size of the paging space in 4 LP blocks:chps -s4 paging00 
+all;swap;paging:To create a paging space on VG newvg of 4 LP size (-s4) and activate it immediately (-n) and activate it at every restarts:mkps -a -n -s4 newvg 
+all;swap;paging:To remove the paging space paging00:rmps paging00 
+all;swap;paging:To invoke all entries in /etc/swapspaces file:swapon -a 
+all;swap;paging:To make available swap space paging00:swapon /dev/paging00 
+all;swap;paging:To disable swap space paging00:swapoff /dev/paging00 
+all;smit;PowerHS:To work with Power HA:smitty cspoc 

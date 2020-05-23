@@ -1,0 +1,4 @@
+#!/bin/bash
+# mvgif.sh
+
+mv ~/Misc/Pics/*.gif ~/Misc/Pics/gif/

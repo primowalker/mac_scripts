@@ -1,0 +1,35 @@
+#!/bin/sh
+#
+    if [ -n "$1" ]; then
+        var="$1"
+    else
+        echo
+        echo Usage: "mkiso <ISO file name> <path to file to be archived>"
+        echo 
+        echo All of the above arguments must be fully qualified path names
+        echo Example - mkiso /iso/coolfile.iso /myfiles 
+        exit
+    fi
+
+ if [ -n "$2" ]; then
+        var="$2"
+    else
+        echo
+        echo Usage: "mkiso <ISO file name> <path to file to be archived>"
+        echo
+        echo All of the above arguments must be fully qualified path names
+        echo Example - mkiso /iso/coolfile.iso /myfiles 
+        exit
+    fi
+
+# "$1" = iso file name - must be a fully qualified path name
+# "$2" = path to files to archive - must be a fully qualified path name 
+
+#Run mkisofs to create the ISO file.
+mkisofs  -log-file /tmp/iso-messages.log -v -a -R -l -o "$1" "$2"
+
+#Check iso logfile for errors
+echo Checking for error messasges in /tmp/iso-messages.log...
+grep err /tmp/iso-messages.log
+echo Error checking complete!
+

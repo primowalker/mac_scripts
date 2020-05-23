@@ -1,0 +1,28 @@
+#!/bin/ksh
+
+mansec=""
+for dir in `echo $MANPATH | sed 's/:/\ /g'`
+do
+    for mandir in `ls -d $dir/man*`
+    do
+	newsec=`basename $mandir | sed 's/man//g'`
+    	mansec="$mansec $newsec"
+    done
+done
+secfile=/tmp/mansecfile.$$
+for i in $mansec
+do
+   echo $i >> $secfile
+done
+mansec=`sort -u $secfile`
+rm -f $secfile
+tmpfile=/tmp/mantmpfile.$$
+for cmd in $@
+do
+   for sect in $mansec
+   do
+	man -s $sect $cmd > $tmpfile 2>&1 
+	[ `wc -l $tmpfile | awk '{print $1}'` -gt 1 ] && man -s $sect $cmd
+	rm -f $tmpfile
+   done
+done

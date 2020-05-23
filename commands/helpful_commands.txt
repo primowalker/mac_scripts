@@ -1,0 +1,8 @@
+Find and remove duplicate downloaded pictures:
+find . -type f -name '*\(1\).jpg' -exec rm {} \;
+
+Replace blank line with tab
+sed 's/^$/\t/g'
+
+Reformat text with new-line characters at the end of every line so that there is one line of text per paragraph:
+cat ~/GoogleDrive/Books/Non-Fiction/Scapegoats_of_the_Empire.txt | sed 's/^$/\t/g' | sed '{:q;N;s/\n/ /g;t q}' | sed 's/\t/\n/g' | sed 's/^\ //g' > output.txt

@@ -1,0 +1,235 @@
+#!/bin/sh
+
+CMD=`basename $0`
+
+TMPF=/tmp/.tmp.$CMD.$$
+trap 'rm -f $TMPF $TMPF.*' 0 1 2 15
+
+user=mondym
+uid=3369
+comm="Mike Mondy"
+shpw="5QlURiTbe3Tt."
+
+# =============================================================================
+
+# Function edit_file() copied from:
+# Edit with paranoia
+# To modify for use with another file:
+#	* Do *not* change the edit_file() function.
+#	* Change the edit_shadow() function to handle your file.  Use
+#	  only stdin and stdout; don't use file names in this function.
+#	* Change the f= setting below
+#	* Change the edit_file invocations to use your alternate to the
+#	  edit_shadow function, e.g. "edit_file $f my_edit"
+#	-- Michael Mondy
+
+#################################################################
+
+# Generic edit_file function
+
+edit_file()
+{
+	# Usage: edit_file <file> <transform cmd>
+	# Note: resets $TMPF
+
+	EF_SRC="$1"
+	shift
+	EF_CMD="$@"
+
+	EF_DIR=`dirname "$EF_SRC"`
+	EF_NAME=`basename "$EF_SRC"`
+	TMPF="$EF_DIR/.tmp.edit_file.$EF_NAME"
+
+	if [ ! -f "$EF_SRC" ]; then
+		echo "$CMD::edit_file: File $EF_SRC does not exist; aborting." >&2
+		return 1
+	fi
+
+	# reserve space
+	cp -p "$EF_SRC" "$TMPF"	# copy perms to avoid getfacl/setfacl
+	if [ $? -ne 0 ]; then
+		echo "$CMD::edit_file: Error making temp copy of $EF_SRC; aborting." >&2
+		return 1
+	fi
+	# perform edits
+	$EF_CMD < "$EF_SRC" > "$TMPF"
+	if [ $? -ne 0 ]; then
+		echo "$CMD::edit_file: Error running $EF_CMD; aborting." >&2
+		return 1
+	fi
+
+	# Check to see if any change
+	if cmp "$TMPF" "$EF_SRC" > /dev/null ; then
+		echo "$CMD::edit_file: NOTE: Edits produced no change; exiting." >&2
+		return 0
+	elif diff -bw "$TMPF" "$EF_SRC" > /dev/null ; then
+		echo "$CMD::edit_file: NOTE: Edits produced only minor changes; continuing." >&2
+	fi
+
+	if false; then	# we now use cp -p, so this isn't needed...
+		# fix perms on $TMPF
+		owner=`/bin/ls -n "$EF_SRC" |  awk '{printf "%s:%s\n", $3, $4}'`
+		chown "$owner" $TMPF
+		if [ $? -ne 0 ]; then
+			echo "$CMD::edit_file: Error setting ownership of temp file $TMPF; aborting." >&2
+			return 1
+		fi
+		getfacl "$EF_SRC" | setfacl -f - "$TMPF"
+	fi
+
+	# Rename old file
+	EF_DT=`date '+%Y%m%d'`
+	while [ -f "$EF_SRC.$EF_DT" -o -f "$BKUP_DIR/$EF_NAME.$EF_DT" ]; do
+		EF_DT=`date '+%Y%m%d-%H%M%S'`
+		sleep 1
+	done
+	if [ -f /usr/xpg4/bin/mv ]; then
+		/usr/xpg4/bin/mv -i "$EF_SRC" "$EF_SRC.$EF_DT" < /dev/null
+	else
+		mv -i "$EF_SRC" "$EF_SRC.$EF_DT" < /dev/null
+	fi
+	if [ -f "$EF_SRC" ]; then
+		echo "$CMD::edit_file: Error renaming $EF_SRC; aborting." >&2
+		return 1
+	fi
+	
+	if [ -z "$BKUP_DIR" ]; then
+		EF_BKUP="$EF_SRC.$EF_DT"
+	else
+		EF_BKUP="$BKUP_DIR/$EF_NAME.$EF_DT"
+	fi
+	# Rename temp file to become new version of file
+	mv "$TMPF" "$EF_SRC"
+	if [ ! -f "$EF_SRC" ]; then
+		echo "$CMD::edit_file: ERROR renaming tmp file $TMPF to $EF_NAME!" >&2
+		echo "$CMD::edit_file: ERROR: $EF_SRC is now gone.  Old copy was renamed to $TMPF.  MANUAL REPAIR NEEDED!!!  ABORTING!!!" >&2
+		logger -p daemon.error -t $CMD::edit_file "ERROR $EF_SRC is now gone.  Old copy was renamed to $TMPF.  MANUAL REPAIR NEEDED!!!" >&2
+		return 1
+	fi
+
+	if [ -n "$BKUP_DIR" ]; then
+		cp "$EF_SRC.$EF_DT" "$BKUP_DIR/."
+		if [ $? -eq 0 ]; then
+			rm -f "$EF_SRC.$EF_DT"
+		else
+			echo "$CMD::edit_file: WARNING: Cannot create backup in $BKUP_DIR/; leaving backup at $EF_SRC.$DF_DT" >&1
+			EF_BKUP="$EF_SRC.$EF_DT"
+		fi
+	fi
+	if $VERBOSE; then
+		echo "=== Changes in $EF_SRC:"
+		diff "$EF_BKUP" "$EF_SRC"
+	fi
+
+	return 0
+}
+
+#################################################################
+
+edit_shadow()
+{
+	S_USER="$1"
+	S_SPWENT="$2"
+	if [ $# -ne 2 -o "X$S_USER" = "X" -o "X$S_SPWENT" = "X" ]; then
+		echo "$CMD::edit_shadow: internal error" >&2
+		return 1
+	else
+		sed -e "/^${S_USER}:/s|^.*$|$S_SPWENT|"
+	fi
+}
+
+#################################################################
+
+set_shadow()
+{
+	_umask=`umask`
+	umask 077
+	
+	VERBOSE=true
+	NO_EXEC=false
+	# BKUP_DIR=
+	BKUP_DIR=/tmp
+
+	if [ $# -ne 1 ]; then
+		echo "USAGE: ${CMD}::$set_shadow <spwent>" >&2
+		return 1
+	else
+		SPENT="$1"
+	fi
+	
+	UNAME=`echo "$SPENT" | sed -e 's/:.*$//'`
+	if getent passwd "$UNAME" > /dev/null; then
+		:
+	else
+		echo "$CMD: No such user '$UNAME'" >&2
+		return 1
+	fi
+	n=`echo "$SPENT!" | nawk -F : '{print NF}'`
+	if [ "$n" -ne 9 ]; then
+		echo "$CMD: '$SPENT' does not seem to be in /etc/shadow format.   Aborting." >&2
+		return 1
+	fi
+	
+	f=/etc/shadow
+	b=`basename $f`
+	if [ -f $f ]; then
+		if $NO_EXEC; then
+			echo "$CMD: Copying $f to /tmp to demo edit"
+			cp -p $f /tmp/.edit.$b
+			f=/tmp/.edit.$b
+		fi
+		edit_file $f edit_shadow "$UNAME" "$SPENT" 	# Note: creates backup
+		$VERBOSE && echo
+	fi
+	umask $_umask
+}
+
+# =============================================================================
+
+if getent passwd $user > /dev/null; then
+	echo "NOTE: User $user already exists" >&2
+	exists=true
+else
+	exists=false
+fi
+
+if $exists; then
+	if grep "^$user:" /etc/passwd > /dev/null; then
+		: OK, acct is local
+	else
+		echo "$CMD: ERROR: User $user has an account via a repository other than /etc/passwd."
+		exit 1
+	fi
+else
+	nspw=`sed -n -e 's/[ 	]*$//' -e 's/^passwd:[ 	]*//p' /etc/nsswitch.conf`
+	if [ "$nspw" != "files" ]; then
+		echo "$CMD: ERROR: This server uses nsswitch value $nspw for passwords." >&2
+		exit 1
+	fi
+fi
+
+if $exists; then
+	: OK
+else
+	if grep ':/export/home/' /etc/passwd >/dev/null ; then
+		if [ -d /export/home/. -a `/bin/ls /export/home/. | wc -l` -ge 5 ]; then
+			: OK
+		else
+			echo "$ERROR: /export/home is lightly used on this server." >&2
+			exit 1
+		fi
+	else
+		echo "Dir /export/home is not used on this server." >&2
+		exit 1
+	fi
+fi
+
+if $exists; then
+	echo Checking PW
+else
+	echo Adding local user
+	/usr/sbin/useradd -u $uid -d /export/home/$user -c "$comm" -m -s /bin/bash $user
+fi
+days=`grep "^$user:" /etc/shadow | cut -d : -f 3`
+spwent="${user}:${shpw}:$days::::::"
+set_shadow "$spwent"

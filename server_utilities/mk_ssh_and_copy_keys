@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+if [ ! -d ~//.ssh ];then
+    mkdir ~//.ssh
+	chmod 700 ~//.ssh
+	chown f8tg2la ~//.ssh
+fi
+
+echo "AAAAB3NzaC1yc2EAAAADAQABAAABAQDTO4hfXazCyHZuuU61iBDpaa6Tolz4IZdmbeSZcq3CreujbRzLxmYenoWhxT5PpbOzgIv/7C0Pg3/YesPsZbivCi5FH8vpmOoUwe31vujbWBl0x+3UDSKAxrd70vXHiCnVLcUwurOWphgDim7AIQdzU5c6ek3Wovt2v0Wwchg+2RfJbrRq7oISLzUATat3jen4FDZnca86EFkStp52XatrrM9d06Sik3BWqn0fIY5t6AHkpGz5hh6ztrwVst38AW08NfO6saTj8d0m4ZtBnNOqbGj8xKT2nzeP5uT3Zr+t8Q3nN3hfQVLbZxdpRR+mlOvxDt3H7szt5Id31umXRZGr" > ~//.ssh/authorized_keys
+echo "AAAAB3NzaC1yc2EAAAADAQABAAABAQDWtxkJmMQzv3hiHbOE+8ltFvgGdW8nzAX9HFWKsREntEC0+tWnGEgwIIk7ByLywZa1aPPOqfsRYojKmzqNIS9ROML/pOZIvCKHfbswZcLxbQnPqAswQWBd0/QZ048PrrmyJSB2AluGyIwAOGMzJJsqZIrkOtb6ZVDFkjbQBWKNBBY8gf4E7IL3zycuPbvA9/rxpHqrdDlhrbaD5gDWPyk3Nb04d2MGIODa4doNymLEfyk5wO+a+DzC0t0CN1VlI9P65d3wmsldNCP7831TPq3KNJC8Pc5mFiGCycj5MnoCHwKskZpiE4EncSbzKHwBjwu2XNwXJ5hHRHUficChgDJ9" >> ~//.ssh/authorized_keys
+chmod 644 ~//.ssh/authorized_keys
+chown f8tg2la ~//.ssh/authorized_keys
+ls -la ~// | grep ssh
+ls -l ~//.ssh/authorized_keys
+ls -l /home | grep f8tg2la

@@ -1,0 +1,24 @@
+#!/bin/sh
+#maillink is a simple script that mails web links to the email address of your choice.  The email address in this script is hard coded for simplicity, because I email links to the same address all the time.  Just edit the script and replace the address here with your address.
+#Get the link
+if [ -n "$1" ]; then
+        var="$1"
+    else
+        echo
+        echo Usage: "maillink <link>" 
+        echo 
+        echo Example - maillink www.sun.com 
+        exit
+    fi
+
+#$1 = link
+
+#Write tempory file
+echo "$1" >> tmpfile
+
+#Run mailx to send message
+mailx -s "$1" james_walker1960@yahoo.com < tmpfile
+
+#Remove the temporary file
+rm tmpfile 
+

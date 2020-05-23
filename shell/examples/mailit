@@ -1,0 +1,45 @@
+#!/bin/sh
+#
+    if [ -n "$1" ]; then
+        var="$1"
+    else
+        echo
+        echo Usage: "mailit <subject> <email address to send to> <body text>"
+        echo 
+        echo Example - mailit ""Hi its me"" maymail@mydomain.com "Please call me when you can"
+        exit
+    fi
+
+ if [ -n "$2" ]; then
+        var="$2"
+    else
+        echo
+        echo Usage: "mailit <subject> <email address to send to> <body text>"
+        echo 
+        echo Example - mailit ""Hi its me"" maymail@mydomain.com "Please call me when you can" 
+        exit
+    fi
+
+#Get the body text
+if [ -n "$3" ]; then
+        var="$3"
+    else
+        echo
+        echo Usage: "mailit <subject> <email address to send to> <body text>"
+        echo 
+        echo Example - mailit "Hi its me" maymail@mydomain.com "Please call me when you can" 
+        exit
+    fi
+
+#$1 = subject
+#$2 = email address
+#$3 = body text
+
+#Write tempory file
+echo "$3" >> tmpfile
+
+#Run mailx to send message
+mailx -s "$1" "$2" < tmpfile
+
+#Remove the temporary file
+rm tmpfile 

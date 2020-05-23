@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# pingtest.sh takes a list of servers from a file and test the ping status of each server.
+
+if [ -n "$1" ]; then
+        var="$1"
+else
+    echo
+    echo "Usage: pingtest.sh <file>"
+    echo "Example - pingtest.sh servers.txt"
+    exit
+fi
+
+servers=`cat $1`
+
+for i in $servers;do
+        ping_status=`ping -c 2 -W 2 $i | grep from`
+        if [ ! -z "$ping_status" ];then
+                echo "$i is alive"
+        else
+                echo "$i is not responding"
+        fi
+done

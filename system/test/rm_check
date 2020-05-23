@@ -1,0 +1,22 @@
+#!/bin/bash
+#!/bin/sh
+if [ -n "$1" ]; then
+        var="$1"
+    else
+        echo
+        echo "Usage: rm <file>"
+        echo 
+        echo "Example - rm *.jpg"
+        exit
+    fi
+    
+while true; do
+    read -p "Are you sure you want to remove the file/directory $1?  y/n: " yn
+    case $yn in
+        [Yy]* ) rm -rf $1; break;;
+        [Nn]* ) exit;;
+        * ) echo "Please answer yes or no.";;
+    esac
+done
+
+

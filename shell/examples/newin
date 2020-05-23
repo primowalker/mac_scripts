@@ -1,0 +1,17 @@
+#!/bin/ksh
+
+tmpfile=/tmp/newinfile.$$
+ps -ef | grep Ali | grep -v grep |  awk '{print $NF}' | awk -F- '{print $2}' | grep ^[0-9] | sort -n > $tmpfile
+var=1
+for num in `cat $tmpfile`
+do
+   win=`sed -n ''$var'p' $tmpfile`
+   [ $win -ne $var ] && last=$var && break
+   ((var+=1))
+   last=$var
+done
+alias xdt='toolwait dtterm -xrm "*menuBar: False" -sl 5000 -name'
+[ $last == "" ] && last=0
+xdt Ali-$last
+unalias rm
+rm -f $tmpfile

@@ -1,0 +1,21 @@
+#mkdalinks creates an HTML output that can be pasted into an HTML compatible document.  
+#The output will be displaying in the HTML document as a word or phrase that is a link to another WWW document.
+
+#!/bin/sh
+#
+    if [ -n "$1" ]; then
+        var="$1"
+    else
+        echo
+        echo Usage: "Error in imput!!"
+        echo 
+        exit
+    fi
+
+#$1 = www address
+
+#Print the HTML string to the stdout.
+
+
+#printf "\a<b><i><a ="" ="$1"href="../webpage/docs/$1">$1</a></i></b>" >> output.html
+echo "<a href="http://storage.east/jayw/docs/$1">$1</a><br>"

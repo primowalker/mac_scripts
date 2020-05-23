@@ -1,0 +1,2 @@
+To identify a disk for replacement:
+cfgadm -x locator=on c0::dsk/c0t1d0
