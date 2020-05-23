@@ -1,7 +1,0 @@
-#!/bin/bash
-
-bash_path=`which bash`
-
-echo "This is the path to bash: $bash_path"
-
-cat unzip_all.sh | sed '1i\#\!'${bash_path}''

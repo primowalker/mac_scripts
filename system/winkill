@@ -1,4 +1,0 @@
-#!/usr/bin/bash
-task=$1
-
-taskkill /IM $task /F
